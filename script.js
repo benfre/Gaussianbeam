@@ -20,6 +20,7 @@
     let opticalElements = []; // { type, position_mm, property: {..}, id }
     let latestPlotData = null; // Cache for canvas and export
     let plotsInitialized = { w: false, r: false };
+    const stateChangeCallbacks = []; // External listeners for config persistence
 
     // --- DOM Element References ---
     // Initialized in initDOMReferences()
@@ -464,6 +465,8 @@
         } finally {
             // console.log("Simulation finished."); // Log end
         }
+
+        notifyStateChange();
     }
 
     function handleSimulationError(message) {
@@ -1425,7 +1428,104 @@ propCell.appendChild(document.createTextNode('mm'));
 
        setTimeout(handleResize, 150);
        console.log("Initialization complete.");
+
+       // Notify any external config manager (e.g. Electron) that the simulator has finished initializing.
+       window.GBSimulatorReady = true;
+       window.dispatchEvent(new Event('gbsimulator:ready'));
    }
+
+   // =========================================================================
+    // === PUBLIC CONFIG API (used by Electron config persistence) ============
+    // =========================================================================
+
+    function getStateSnapshot() {
+        return {
+            beamParams: Object.assign({}, beamParams),
+            opticalElements: opticalElements.map(el => ({
+                type: el.type,
+                position_mm: el.position_mm,
+                id: el.id,
+                property: Object.assign({}, el.property)
+            })),
+            ui: {
+                showElements: !!(showElementsCheck && showElementsCheck.checked),
+                showWaists: !!(showWaistsCheck && showWaistsCheck.checked)
+            }
+        };
+    }
+
+    function applyState(state) {
+        if (!state || typeof state !== 'object') {
+            console.warn('GBSimulator.applyState: invalid state object');
+            return false;
+        }
+
+        // 1. Beam parameters (only assign known numeric keys)
+        if (state.beamParams && typeof state.beamParams === 'object') {
+            for (const key in beamParams) {
+                if (Object.prototype.hasOwnProperty.call(state.beamParams, key)) {
+                    const num = Number(state.beamParams[key]);
+                    if (!isNaN(num)) {
+                        beamParams[key] = num;
+                    }
+                }
+            }
+        }
+
+        // 2. Optical elements
+        if (Array.isArray(state.opticalElements)) {
+            const knownTypes = ['lens', 'mirror_spherical', 'mirror_flat', 'slab_dielectric', 'abcd_generic'];
+            opticalElements.length = 0;
+            state.opticalElements.forEach(el => {
+                if (!el || typeof el !== 'object' || !el.type) return;
+                if (knownTypes.indexOf(el.type) === -1) {
+                    console.warn('GBSimulator.applyState: skipping unknown element type', el.type);
+                    return;
+                }
+                const position_mm = Number(el.position_mm);
+                const rawProperty = (el.property && typeof el.property === 'object') ? el.property : {};
+                const property = {};
+                for (const k in rawProperty) {
+                    if (Object.prototype.hasOwnProperty.call(rawProperty, k)) {
+                        const num = Number(rawProperty[k]);
+                        property[k] = isNaN(num) ? rawProperty[k] : num;
+                    }
+                }
+                opticalElements.push({
+                    type: el.type,
+                    position_mm: isNaN(position_mm) ? 0 : position_mm,
+                    property: property,
+                    id: el.id || (Date.now().toString() + Math.random().toString(36).substring(2, 11))
+                });
+            });
+        }
+
+        // 3. UI toggles
+        if (state.ui && typeof state.ui === 'object') {
+            if (showElementsCheck) showElementsCheck.checked = !!state.ui.showElements;
+            if (showWaistsCheck) showWaistsCheck.checked = !!state.ui.showWaists;
+        }
+
+        runSimulation();
+        return true;
+    }
+
+    function notifyStateChange() {
+        const snapshot = getStateSnapshot();
+        stateChangeCallbacks.forEach(cb => {
+            try { cb(snapshot); } catch (error) { console.error('Config state callback error:', error); }
+        });
+    }
+
+    window.GBSimulator = {
+        getState: getStateSnapshot,
+        applyState: applyState,
+        subscribe: function (callback) {
+            if (typeof callback === 'function' && stateChangeCallbacks.indexOf(callback) === -1) {
+                stateChangeCallbacks.push(callback);
+            }
+        }
+    };
 
    if (document.readyState === 'loading') {
        document.addEventListener('DOMContentLoaded', initialize);

@@ -3,17 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Gaussian Beam Simulator</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/visuphy/visuphy.github.io/refs/heads/main/favicon.png">
-  <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="favicon.png">
+  <!-- Font Awesome (local, offline) -->
+  <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css" />
 
   <!-- Global Styles -->
   <link rel="stylesheet" href="style.css">
-  <!-- Header & Footer Styles -->
-  <link rel="stylesheet" href="/header.css">
-  <link rel="stylesheet" href="/footer.css">
 
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="vendor/plotly.min.js"></script>
 </head>
 <body>
 
@@ -133,6 +130,12 @@
               <button id="importSetupBtn" class="control-button" title="Import setup from XML file (replaces current)">
                   <i class="fa-solid fa-file-import"></i> Import Setup
               </button>
+              <button id="exportConfigBtn" class="control-button" title="Export full configuration (incl. display options) to a JSON file">
+                  <i class="fa-solid fa-save"></i> Export Config
+              </button>
+              <button id="importConfigBtn" class="control-button" title="Import full configuration from a JSON file (replaces current)">
+                  <i class="fa-solid fa-folder-open"></i> Import Config
+              </button>
               <!-- Hidden file input for import -->
               <input type="file" id="importSetupInput" accept=".xml" style="display: none;">
           </div>
@@ -199,7 +202,7 @@
 
   <script src="script.js"></script>
   <script src="interactiveCanvas.js"></script>
-  <!-- Script to include Header/Footer -->
-  <script src="/layout.js" defer></script>
+  <!-- Electron config persistence bridge (no-op in a plain browser) -->
+  <script src="electron-config.js"></script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+release/
+release-final/
+release-*/
+dist-build/
+dist-*/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Generated build resources (bad ICO leftover; the build uses build/icon.png)
+build/icon.ico

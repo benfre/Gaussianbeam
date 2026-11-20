@@ -320,6 +320,18 @@ button:hover {
 #importSetupBtn:hover {
     background-color: #31b0d5;
 }
+#exportConfigBtn {
+    background-color: #5cb85c; /* Green */
+}
+#exportConfigBtn:hover {
+    background-color: #449d44;
+}
+#importConfigBtn {
+    background-color: #f0ad4e; /* Orange */
+}
+#importConfigBtn:hover {
+    background-color: #ec971f;
+}
 
 /* Table itself */
 table {

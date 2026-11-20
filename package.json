@@ -1,0 +1,76 @@
+{
+  "name": "gaussian-beam-simulator",
+  "version": "1.0.0",
+  "description": "Interactive Gaussian Beam Simulator (ABCD matrix) packaged as a standalone Electron application",
+  "main": "main.js",
+  "author": "VisuPhy",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "node scripts/ensure-electron.js && node scripts/vendor.js",
+    "vendor": "node scripts/vendor.js",
+    "dist": "node scripts/dist.js --win",
+    "dist:dir": "node scripts/dist.js --win --dir"
+  },
+  "build": {
+    "appId": "com.visuphy.gaussianbeam",
+    "productName": "Gaussian Beam Simulator",
+    "copyright": "VisuPhy (MIT License)",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "electron-config.js",
+      "gaussianbeam.html",
+      "script.js",
+      "interactiveCanvas.js",
+      "style.css",
+      "intro_style.css",
+      "favicon.png",
+      "logo.png",
+      "Screenshot.png",
+      "Screenshot.webp",
+      "LICENSE",
+      "ThirdPartyLicenses.txt",
+      "vendor/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Gaussian Beam Simulator"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^7.3.1",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "plotly.js-dist-min": "^4.3.0"
+  }
+}
